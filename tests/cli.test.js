@@ -16,6 +16,7 @@ function require_fs() { return { writeFileSync, unlinkSync }; }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI = join(__dirname, '..', 'src', 'cli', 'index.js');
+const PINE_CHECK_MOCK_ENV = { ...process.env, TV_MCP_PINE_CHECK_MOCK: '1' };
 
 function run(args, opts = {}) {
   try {
@@ -132,7 +133,7 @@ describe('CLI — pine analyze (offline)', () => {
 describe('CLI — pine check (server compile)', () => {
   it('compiles valid Pine Script', () => {
     const source = '//@version=6\nindicator("test")\nplot(close)';
-    const { stdout, exitCode } = run(['pine', 'check'], { input: source });
+    const { stdout, exitCode } = run(['pine', 'check'], { input: source, env: PINE_CHECK_MOCK_ENV });
     assert.equal(exitCode, 0);
     const result = JSON.parse(stdout);
     assert.equal(result.success, true);
@@ -141,7 +142,7 @@ describe('CLI — pine check (server compile)', () => {
 
   it('returns errors for invalid Pine Script', () => {
     const source = '//@version=6\nindicator("test")\nplot(nonexistent_var)';
-    const { stdout, exitCode } = run(['pine', 'check'], { input: source });
+    const { stdout, exitCode } = run(['pine', 'check'], { input: source, env: PINE_CHECK_MOCK_ENV });
     assert.equal(exitCode, 0);
     const result = JSON.parse(stdout);
     assert.equal(result.compiled, false);

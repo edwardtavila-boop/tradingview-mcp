@@ -184,6 +184,20 @@ export function analyze({ source }) {
 }
 
 export async function check({ source }) {
+  if (process.env.TV_MCP_PINE_CHECK_MOCK === '1') {
+    const hasCompileError = /\b(?:nonexistent_var|this_function_does_not_exist)\b/.test(source);
+    return {
+      success: true,
+      compiled: !hasCompileError,
+      error_count: hasCompileError ? 1 : 0,
+      warning_count: 0,
+      errors: hasCompileError
+        ? [{ message: 'Mock Pine compile error: unresolved identifier' }]
+        : undefined,
+      note: hasCompileError ? undefined : 'Pine Script compiled successfully.',
+    };
+  }
+
   const formData = new URLSearchParams();
   formData.append('source', source);
 
